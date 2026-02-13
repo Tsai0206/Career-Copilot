@@ -8,13 +8,16 @@ import { Loader2, Download, Copy, ExternalLink, ArrowLeft } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 
 export default function ProjectPage() {
-    const { id } = useParams()
+    const params = useParams()
+    const id = params?.id as string
     const supabase = createClient()
     const [project, setProject] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         async function loadData() {
+            if (!id) return
+
             const { data } = await supabase
                 .from('project_suggestions')
                 .select('*')

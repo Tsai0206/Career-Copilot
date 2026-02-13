@@ -37,11 +37,19 @@ export default function AnalyzePage() {
 
             // 3. Call Edge Function to process (status update happens there)
             // For MVP we await it, but ideally it's async background
-            const { error: fnError } = await supabase.functions.invoke('parse-jd', {
+            // 3. Call Edge Function to process (status update happens there)
+            // For MVP we await it, but ideally it's async background
+            const { data: fnData, error: fnError } = await supabase.functions.invoke('parse-jd', {
                 body: { analysis_id: analysis.id, jd_text: jdText }
             })
 
+            console.log('Edge Function Response:', fnData, fnError)
+
             if (fnError) throw fnError
+            // Check for error returned in 200 OK body
+            if (fnData && fnData.error) {
+                throw new Error(`Edge Function Error: ${fnData.error} (Stack: ${fnData.stack})`)
+            }
 
             // 4. Redirect to Dashboard (or specific analysis view)
             router.push(`/dashboard?analysis=${analysis.id}`)

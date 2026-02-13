@@ -19,8 +19,11 @@ Deno.serve(async (req) => {
         )
 
         const genAI = new GoogleGenerativeAI(Deno.env.get('GOOGLE_API_KEY') ?? '')
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
-        const embeddingModel = genAI.getGenerativeModel({ model: 'text-embedding-004' })
+        // SWITCH TO GEMINI 2.5 FLASH (Working model)
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+
+        // Embedding Model (Assume accurate)
+        const embeddingModel = genAI.getGenerativeModel({ model: 'gemini-embedding-001' })
 
         // 1. Extract Skills & Metadata
         const prompt = `
@@ -66,9 +69,14 @@ Deno.serve(async (req) => {
         })
 
     } catch (error) {
+        console.error('Edge Function Error:', error)
         return new Response(JSON.stringify({ error: error.message }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        })
-    }
-})
+        } catch (error) {
+            console.error('Edge Function Error:', error)
+            // Return 200 to expose the error message to the client instead of a generic 500
+            return new Response(JSON.stringify({ error: error.message, stack: error.stack }), {
+                status: 200,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            })
+        }
+    })

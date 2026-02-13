@@ -22,9 +22,10 @@ export type Database = {
                     extracted_requirements: Json | null
                     extracted_skills: Json | null
                     id: string
-                    jd_embedding: string | null
+                    jd_embedding: string | number[] | null
                     jd_raw_text: string
                     role_title: string | null
+                    status: string | null
                     skill_gaps: Json | null
                     user_id: string | null
                 }
@@ -35,9 +36,10 @@ export type Database = {
                     extracted_requirements?: Json | null
                     extracted_skills?: Json | null
                     id?: string
-                    jd_embedding?: string | null
+                    jd_embedding?: string | number[] | null
                     jd_raw_text: string
                     role_title?: string | null
+                    status?: string | null
                     skill_gaps?: Json | null
                     user_id?: string | null
                 }
@@ -48,9 +50,10 @@ export type Database = {
                     extracted_requirements?: Json | null
                     extracted_skills?: Json | null
                     id?: string
-                    jd_embedding?: string | null
+                    jd_embedding?: string | number[] | null
                     jd_raw_text?: string
                     role_title?: string | null
+                    status?: string | null
                     skill_gaps?: Json | null
                     user_id?: string | null
                 }
@@ -68,10 +71,11 @@ export type Database = {
                 Row: {
                     brand_guidelines_url: string | null
                     created_at: string | null
-                    embedding: string | null
+                    embedding: string | number[] | null
                     full_name: string | null
                     id: string
                     resume_url: string | null
+                    resume_text: string | null
                     skills: Json | null
                     target_role: string | null
                     title: string | null
@@ -80,10 +84,11 @@ export type Database = {
                 Insert: {
                     brand_guidelines_url?: string | null
                     created_at?: string | null
-                    embedding?: string | null
+                    embedding?: string | number[] | null
                     full_name?: string | null
                     id: string
                     resume_url?: string | null
+                    resume_text?: string | null
                     skills?: Json | null
                     target_role?: string | null
                     title?: string | null
@@ -92,10 +97,11 @@ export type Database = {
                 Update: {
                     brand_guidelines_url?: string | null
                     created_at?: string | null
-                    embedding?: string | null
+                    embedding?: string | number[] | null
                     full_name?: string | null
                     id?: string
                     resume_url?: string | null
+                    resume_text?: string | null
                     skills?: Json | null
                     target_role?: string | null
                     title?: string | null

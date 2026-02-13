@@ -14,19 +14,26 @@ export default function DashboardPage() {
     const [suggestions, setSuggestions] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
+    // Polling & Auto-trigger Logic
     useEffect(() => {
-        async function loadData() {
+        let intervalId: NodeJS.Timeout
+
+        async function checkStatusAndTrigger() {
             if (!analysisId) return
 
-            const { data: analysisData } = await supabase
+            // 1. Fetch latest status
+            const { data: currentAnalysis, error } = await supabase
                 .from('job_analyses')
                 .select('*')
                 .eq('id', analysisId)
                 .single()
 
-            setAnalysis(analysisData)
+            if (error || !currentAnalysis) return
 
-            if (analysisData) {
+            setAnalysis(currentAnalysis)
+
+            // 2. Fetch suggestions if analyzed
+            if (currentAnalysis.status === 'analyzed' || currentAnalysis.skill_gaps) {
                 const { data: suggestionsData } = await supabase
                     .from('project_suggestions')
                     .select('*')
@@ -34,11 +41,27 @@ export default function DashboardPage() {
 
                 setSuggestions(suggestionsData || [])
             }
-            setLoading(false)
-        }
-        loadData()
 
-        // Realtime subscription could go here
+            // 3. Auto-trigger next steps
+            // If just parsed (extracted skills), trigger Gap Analysis
+            if (currentAnalysis.status === 'parsed') {
+                console.log('Triggering Gap Analysis...')
+                // Update status locally to prevent double-triggering before DB updates
+                setAnalysis(prev => ({ ...prev, status: 'analyzing_gap' }))
+
+                await supabase.functions.invoke('analyze-gap', {
+                    body: { analysis_id: analysisId }
+                })
+            }
+        }
+
+        // Initial check
+        checkStatusAndTrigger()
+
+        // Poll every 5 seconds
+        intervalId = setInterval(checkStatusAndTrigger, 5000)
+
+        // Realtime subscription (keep as backup/live update)
         const channel = supabase
             .channel('schema-db-changes')
             .on(
@@ -55,7 +78,10 @@ export default function DashboardPage() {
             )
             .subscribe()
 
-        return () => { supabase.removeChannel(channel) }
+        return () => {
+            clearInterval(intervalId)
+            supabase.removeChannel(channel)
+        }
     }, [analysisId, supabase])
 
     if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin" /></div>
